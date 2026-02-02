@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>e-BIG IPGKDA | Sistem Markah Live</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;700;800&display=swap');
+        body { font-family: 'Sora', sans-serif; background: #f8fafc; }
+        .bento-card { background: white; border-radius: 24px; border: 1px solid #e2e8f0; transition: all 0.3s ease; }
+        .bento-card:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.05); }
+        .mark-input { border: 2px solid #f1f5f9; border-radius: 12px; padding: 12px; text-align: center; font-weight: 800; width: 100%; }
+        .mark-input:focus { border-color: #4f46e5; outline: none; background: #fefeff; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <header class="max-w-6xl mx-auto mb-10 text-center">
+        <h1 class="text-4xl font-extrabold text-slate-900 tracking-tighter">e-BIG <span class="text-indigo-600">LIVE</span></h1>
+        <p class="text-slate-500 text-sm font-medium uppercase tracking-widest mt-2">Sistem Pentaksiran MPU3212 [cite: 4]</p>
+    </header>
+
+    <main class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="md:col-span-1 space-y-6">
+            <div class="bento-card p-6">
+                <label class="text-[10px] font-black uppercase text-slate-400 mb-4 block">Carian Pelajar</label>
+                <input type="text" id="search-kp" class="w-full p-4 bg-slate-50 rounded-2xl font-bold" placeholder="Masukkan No. KP...">
+                <button onclick="cariPelajar()" class="w-full mt-4 bg-indigo-600 text-white py-4 rounded-2xl font-bold shadow-lg shadow-indigo-200">CARI</button>
+            </div>
+            
+            <div id="profil-box" class="bento-card p-6 hidden">
+                <div class="flex items-center gap-4">
+                    <img id="p-img" src="" class="w-16 h-16 rounded-2xl object-cover bg-slate-100">
+                    <div>
+                        <h2 id="p-nama" class="font-bold text-slate-800 leading-tight">-</h2>
+                        <p id="p-info" class="text-[10px] text-indigo-600 font-bold mt-1 uppercase">-</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="md:col-span-2 space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bento-card p-6 border-l-8 border-l-blue-500">
+                    <h3 class="font-black text-xs uppercase mb-4">Tugasan 1: Kuiz (10%) [cite: 13, 112]</h3>
+                    <div class="flex gap-4">
+                        <div><span class="text-[9px] font-bold">Kuiz I (5%) [cite: 56]</span><input type="number" id="t1-1" class="mark-input"></div>
+                        <div><span class="text-[9px] font-bold">Kuiz II (5%) [cite: 57]</span><input type="number" id="t1-2" class="mark-input"></div>
+                    </div>
+                </div>
+
+                <div class="bento-card p-6 border-l-8 border-l-amber-500">
+                    <h3 class="font-black text-xs uppercase mb-4">Tugasan 2: Amali I (20%) [cite: 114]</h3>
+                    <div class="flex gap-4">
+                        <div><span class="text-[9px] font-bold">HP4 (10%) [cite: 17]</span><input type="number" id="t2-1" class="mark-input"></div>
+                        <div><span class="text-[9px] font-bold">HP5 (10%) [cite: 18]</span><input type="number" id="t2-2" class="mark-input"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bento-card p-8 border-l-8 border-l-emerald-500">
+                <h3 class="font-black text-xs uppercase mb-6">Tugasan 3: Amali II (70%) [cite: 116]</h3>
+                <div class="grid grid-cols-3 gap-6">
+                    <div><span class="text-[9px] font-bold">HP3 (25%) [cite: 28]</span><input type="number" id="t3-1" class="mark-input"></div>
+                    <div><span class="text-[9px] font-bold">HP8 IND (15%) [cite: 31]</span><input type="number" id="t3-2" class="mark-input"></div>
+                    <div><span class="text-[9px] font-bold">HP8 KUM (30%) [cite: 34]</span><input type="number" id="t3-3" class="mark-input"></div>
+                </div>
+                <button onclick="hantarMarkah()" class="w-full mt-8 bg-slate-900 text-white py-5 rounded-2xl font-black tracking-widest uppercase">KEMASKINI LIVE</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        async function hantarMarkah() {
+            const data = {
+                action: "update_mark",
+                no_kp: document.getElementById('search-kp').value,
+                markah: {
+                    t1_1: document.getElementById('t1-1').value,
+                    t1_2: document.getElementById('t1-2').value,
+                    t2_1: document.getElementById('t2-1').value,
+                    t2_2: document.getElementById('t2-2').value,
+                    t3_1: document.getElementById('t3-1').value,
+                    t3_2: document.getElementById('t3-2').value,
+                    t3_3: document.getElementById('t3-3').value
+                }
+            };
+            
+            const res = await fetch('/api/gateway', {
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+            const result = await res.json();
+            alert(result.message || "Data berjaya dihantar ke Google Sheets!");
+        }
+    </script>
+</body>
+</html>
